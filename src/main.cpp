@@ -1,5 +1,4 @@
 #include <Arduino.h>
-void controlLED();
 
 // Pin assignments
 const int buttonPin = 2;
