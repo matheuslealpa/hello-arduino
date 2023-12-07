@@ -1,75 +1,46 @@
 #include <Adafruit_NeoPixel.h>
 
-#define NUM_STRIPS 7
-const int LED_PER_STRIP = 42;  // número de LEDs por faixa
+const int LED_PER_STRIP = 42;  // número de LEDs
 const int LED_PIN = 2;         // pino de sinal
 
-Adafruit_NeoPixel strips[NUM_STRIPS];
+Adafruit_NeoPixel pixels(LED_PER_STRIP, LED_PIN, NEO_GRB + NEO_KHZ800);
+#define DELAYVAL 1000
+
+const byte zero[] = {B000000, B111111, B111111, B111111, B111111, B111111, B111111}; 
+const byte one[] = {B000000, B111111, B000000, B000000, B000000, B000000, B111111}; 
+const byte two[] = {B111111, B111111, B111111, B000000, B111111, B111111, B000000}; 
+const byte three[] = {B111111, B111111, B111111, B000000, B000000, B111111, B111111}; 
+const byte four[] = {B111111, B111111, B000000, B111111, B000000, B000000, B111111};
+const byte five[] = {B111111, B000000, B111111, B111111, B000000, B111111, B111111};
 
 void setup() {
-  Serial.begin(115200);
-  
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    strips[i] = Adafruit_NeoPixel(LED_PER_STRIP, LED_PIN + i * LED_PER_STRIP, NEO_GRB + NEO_KHZ800);
-    strips[i].begin();
-    strips[i].clear();
-  }
-}
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+    clock_prescale_set(clock_div_1);
+  #endif
 
-void displayNumberZero() {
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    for (int j = 6; j < LED_PER_STRIP; j++) {
-      strips[i].setPixelColor(j, strips[i].Color(255, 0, 0));
-    }
-  }
-}
-
-void displayNumberOne() {
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    for (int j = 6; j < 12; j++) {
-      strips[i].setPixelColor(j, strips[i].Color(255, 0, 0));
-    }
-    for (int j = 36; j < 42; j++) {
-      strips[i].setPixelColor(j, strips[i].Color(255, 0, 0));
-    }
-  }
-}
-
-void displayNumberThree() {
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    for (int j = 6; j < 18; j++) {
-      strips[i].setPixelColor(j, strips[i].Color(255, 0, 0));
-    }
-    for (int j = 30; j < 42; j++) {
-      strips[i].setPixelColor(j, strips[i].Color(255, 0, 0));
-    }
-  }
+  pixels.begin();
 }
 
 void loop() {
-  // Desligar todas as faixas
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    strips[i].clear();
-  }
-  
-  // Exibir o número "0"
-  displayNumberZero();
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    strips[i].show();
-  }
-  delay(1000);
+  //printNumber(zero, sizeof(zero) / sizeof(zero[0]), pixels.Color(0, 150, 0));
+  //printNumber(one, sizeof(one) / sizeof(one[0]), pixels.Color(0, 0, 150));
+  //printNumber(two, sizeof(two) / sizeof(two[0]), pixels.Color(0, 100, 150));
+  //printNumber(three, sizeof(three) / sizeof(three[0]), pixels.Color(150, 0, 150));
+  //printNumber(four, sizeof(four) / sizeof(four[0]), pixels.Color(150, 0, 150));
+  printNumber(five, sizeof(five) / sizeof(five[0]), pixels.Color(150, 0, 150));
+}
 
-  // Exibir o número "1"
-  displayNumberOne();
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    strips[i].show();
-  }
-  delay(1000);
+void printNumber(const byte* number, int length, uint32_t color) {
+  pixels.clear();
 
-  // Exibir o número "3"
-  displayNumberThree();
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    strips[i].show();
+  for (int i = 0; i < length; i++) {
+    for (int j = 0; j < 6; j++) {
+      if (bitRead(number[i], j)) {
+        pixels.setPixelColor(i * 6 + j, color);
+      }
+    }
   }
-  delay(1000);
+
+  pixels.show();
+  delay(DELAYVAL);
 }
